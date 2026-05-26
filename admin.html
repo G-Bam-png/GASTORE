@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechStore — Управление</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F1923;--surface:#162130;--card:#1C2B3A;--border:rgba(255,255,255,0.08);
+  --blue:#2AABEE;--green:#2ECC8A;--red:#E85555;--amber:#F5A623;
+  --text:#EDF2F7;--muted:#6B8299;--accent:#54B8FF;
+  --radius:8px;--radius-lg:12px;
+}
+body{background:#0a1520;font-family:'Segoe UI',system-ui,sans-serif;display:flex;justify-content:center;min-height:100vh;padding:20px}
+.wrap{width:440px;background:var(--bg);border-radius:24px;overflow:hidden;border:0.5px solid var(--border);box-shadow:0 8px 40px rgba(0,0,0,.5);display:flex;flex-direction:column}
+.topbar{background:var(--surface);padding:13px 16px;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid var(--border);flex-shrink:0}
+.logo{width:30px;height:30px;background:var(--red);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.logo i{font-size:15px;color:#fff}
+.topbar-text{flex:1}
+.topbar-title{color:var(--text);font-size:15px;font-weight:600}
+.topbar-sub{color:var(--muted);font-size:11px;margin-top:1px}
+.admin-badge{background:rgba(232,85,85,.15);color:var(--red);font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700}
+.content{flex:1;padding:16px}
+.content::-webkit-scrollbar{width:3px}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* SETUP SCREEN */
+.setup-screen{display:none}
+.setup-screen.on{display:block}
+.setup-hero{text-align:center;padding:20px 0 24px}
+.setup-hero i{font-size:48px;color:var(--blue);opacity:.8;display:block;margin-bottom:12px}
+.setup-hero h2{color:var(--text);font-size:18px;font-weight:600;margin-bottom:6px}
+.setup-hero p{color:var(--muted);font-size:13px;line-height:1.6}
+.setup-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
+.setup-card-title{color:var(--text);font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.setup-card-title i{font-size:18px}
+.step-num{background:var(--blue);color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* MAIN SCREEN */
+.main-screen{display:none}
+.main-screen.on{display:block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center}
+.stat-val{color:var(--text);font-size:20px;font-weight:700;margin-bottom:3px}
+.stat-label{color:var(--muted);font-size:10px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.sec-title{color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.add-btn{background:var(--blue);border:none;color:#fff;padding:6px 12px;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:background .15s}
+.add-btn:hover{background:#1a9fd4}
+.add-btn i{font-size:14px}
+.admcard{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:9px}
+.admemoji{font-size:28px;width:36px;text-align:center;flex-shrink:0}
+.adm-info{flex:1;min-width:0}
+.adm-name{color:var(--text);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-desc{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.adm-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;align-items:center}
+.adm-price{color:var(--green);font-size:12px;font-weight:600}
+.adm-cat{background:rgba(42,171,238,.12);color:var(--blue);font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.pstock{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.in{background:rgba(46,204,138,.12);color:var(--green)}
+.out{background:rgba(232,85,85,.12);color:var(--red)}
+.adm-acts{display:flex;gap:5px;flex-shrink:0}
+.act-btn{background:var(--card);border:0.5px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.act-btn:hover{color:var(--text)}
+.act-btn.del:hover{color:var(--red)}
+.act-btn i{font-size:15px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty i{font-size:44px;opacity:.25;display:block;margin-bottom:12px}
+.empty p{font-size:13px}
+.divider{border:none;border-top:0.5px solid var(--border);margin:18px 0}
+.cloud-status{display:flex;align-items:center;gap:8px;background:rgba(46,204,138,.08);border:0.5px solid rgba(46,204,138,.25);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--green)}
+.cloud-status i{font-size:16px;flex-shrink:0}
+
+/* SHARED */
+.fld{margin-bottom:11px}
+.fld label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px;font-weight:500}
+.inp{width:100%;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:9px 11px;color:var(--text);font-size:13px;outline:none;font-family:inherit;transition:border-color .15s}
+.inp:focus{border-color:rgba(42,171,238,.5)}
+select.inp option{background:var(--card);color:var(--text)}
+.infobox{background:rgba(42,171,238,.08);border:0.5px solid rgba(42,171,238,.25);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--accent);line-height:1.6;margin-bottom:12px}
+.infobox i{font-size:14px;vertical-align:-2px;margin-right:4px}
+.warnbox{background:rgba(245,166,35,.08);border:0.5px solid rgba(245,166,35,.25);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--amber);line-height:1.6;margin-bottom:12px}
+.warnbox i{font-size:14px;vertical-align:-2px;margin-right:4px}
+.savebtn{width:100%;border:none;color:#fff;padding:12px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;transition:opacity .15s;margin-bottom:9px}
+.savebtn:hover{opacity:.88}
+.savebtn:disabled{opacity:.5;cursor:not-allowed}
+.savebtn.green{background:var(--green)}
+.savebtn.blue{background:var(--blue)}
+.savebtn.red{background:var(--red)}
+.savebtn.gray{background:var(--muted)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;width:100%;max-width:380px;animation:modalIn .2s ease}
+@keyframes modalIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{color:var(--text);font-size:15px;font-weight:600;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between}
+.close-btn{background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;padding:2px;border-radius:var(--radius)}
+.close-btn i{font-size:20px}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:9px 18px;border-radius:24px;font-size:13px;font-weight:600;display:none;white-space:nowrap;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.toast.err{background:var(--red)}
+.toast.warn{background:var(--amber)}
+.toast.show{display:block;animation:ftio 2.5s forwards}
+@keyframes ftio{0%{opacity:0;transform:translateX(-50%) translateY(12px)}12%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0}}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+a.link{color:var(--blue);text-decoration:none}
+a.link:hover{text-decoration:underline}
+code{background:var(--card);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--accent);font-family:monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="logo"><i class="ti ti-shield-lock"></i></div>
+    <div class="topbar-text">
+      <div class="topbar-title">Панель управления</div>
+      <div class="topbar-sub" id="sname-sub">TechStore</div>
+    </div>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+
+  <div class="content" id="content">
+
+    <!-- SETUP SCREEN -->
+    <div class="setup-screen on" id="setup-screen">
+      <div class="setup-hero">
+        <i class="ti ti-cloud-upload"></i>
+        <h2>Настройка облака</h2>
+        <p>Нужно создать бесплатное хранилище на JSONBin.io — это займёт 2 минуты. Товары сразу появятся у всех клиентов на любом устройстве.</p>
+      </div>
+
+      <div class="setup-card">
+        <div class="setup-card-title"><span class="step-num">1</span> Зарегистрируйтесь на JSONBin.io</div>
+        <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:12px">Перейдите на <a class="link" href="https://jsonbin.io" target="_blank">jsonbin.io</a> → нажмите <b>Sign Up</b> → войдите через GitHub или email. Это бесплатно.</p>
+      </div>
+
+      <div class="setup-card">
+        <div class="setup-card-title"><span class="step-num">2</span> Получите API-ключ</div>
+        <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:12px">После входа нажмите на иконку профиля вверху → <b>API Keys</b> → скопируйте <b>Master Key</b> (длинная строка начинается с <code>$2b$</code>)</p>
+        <div class="fld"><label>Вставьте Master Key сюда</label><input class="inp" id="setup-apikey" placeholder="$2b$10$..."></div>
+      </div>
+
+      <div class="setup-card">
+        <div class="setup-card-title"><span class="step-num">3</span> Создайте хранилище (Bin)</div>
+        <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-bottom:12px">Нажмите кнопку ниже — хранилище создастся автоматически с вашим API-ключом.</p>
+        <button class="savebtn green" id="create-bin-btn" onclick="createBin()"><i class="ti ti-cloud-plus"></i>Создать хранилище автоматически</button>
+      </div>
+
+      <div class="setup-card">
+        <div class="setup-card-title"><span class="step-num">4</span> Telegram уведомления</div>
+        <div class="fld"><label>Токен бота (от @BotFather)</label><input class="inp" id="setup-token" placeholder="123456789:AAHdq..."></div>
+        <div class="fld"><label>Ваш Chat ID (от @userinfobot)</label><input class="inp" id="setup-chatid" placeholder="123456789"></div>
+      </div>
+
+      <div class="setup-card">
+        <div class="setup-card-title"><span class="step-num">5</span> Информация о магазине</div>
+        <div class="fld"><label>Название магазина</label><input class="inp" id="setup-shopname" placeholder="TechStore" value="TechStore"></div>
+        <div class="row2">
+          <div class="fld"><label>Telegram</label><input class="inp" id="setup-tg" placeholder="@techstore"></div>
+          <div class="fld"><label>Телефон</label><input class="inp" id="setup-phone" placeholder="+7 (999) 000-00-00"></div>
+        </div>
+        <button class="savebtn blue" id="finish-btn" onclick="finishSetup()" disabled><i class="ti ti-check"></i>Завершить настройку</button>
+      </div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div class="main-screen" id="main-screen">
+      <div class="cloud-status">
+        <i class="ti ti-cloud-check"></i>
+        <span>Облако подключено — товары синхронизируются у всех клиентов</span>
+        <button onclick="resetSetup()" style="background:none;border:none;color:var(--muted);cursor:pointer;margin-left:auto;font-size:11px;white-space:nowrap;font-family:inherit">Сбросить</button>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="sec-hdr">
+        <span class="sec-title">Товары</span>
+        <button class="add-btn" onclick="openModal()"><i class="ti ti-plus"></i>Добавить товар</button>
+      </div>
+      <div id="admin-list"></div>
+
+      <hr class="divider">
+      <div class="sec-title" style="margin-bottom:12px">Настройки</div>
+      <div class="fld"><label>Токен Telegram-бота</label><input class="inp" id="m-token" placeholder="123456789:AAHdq..."></div>
+      <div class="fld"><label>Chat ID</label><input class="inp" id="m-chatid" placeholder="123456789"></div>
+      <div class="fld"><label>Название магазина</label><input class="inp" id="m-shopname" placeholder="TechStore"></div>
+      <div class="row2">
+        <div class="fld"><label>Telegram магазина</label><input class="inp" id="m-tg" placeholder="@techstore"></div>
+        <div class="fld"><label>Телефон</label><input class="inp" id="m-phone" placeholder="+7 (999) 000-00-00"></div>
+      </div>
+      <button class="savebtn blue" id="save-settings-btn" onclick="saveAndSync()"><i class="ti ti-device-floppy"></i>Сохранить и синхронизировать</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-title-text">Добавить товар</span>
+      <button class="close-btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fld"><label>Название товара</label><input class="inp" id="f-name" placeholder="Ноутбук ASUS VivoBook 15"></div>
+    <div class="fld"><label>Описание</label><input class="inp" id="f-desc" placeholder="Intel i5, 16GB RAM, 512GB SSD"></div>
+    <div class="row2">
+      <div class="fld"><label>Цена (₽)</label><input class="inp" id="f-price" type="number" placeholder="49990" min="0"></div>
+      <div class="fld"><label>Эмодзи</label><input class="inp" id="f-emoji" placeholder="💻" maxlength="4"></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>Категория</label>
+        <select class="inp" id="f-cat">
+          <option value="laptop">Ноутбуки</option>
+          <option value="phone">Смартфоны</option>
+          <option value="audio">Аудио</option>
+          <option value="accessories">Аксессуары</option>
+          <option value="tablet">Планшеты</option>
+          <option value="other">Другое</option>
+        </select>
+      </div>
+      <div class="fld"><label>Наличие</label>
+        <select class="inp" id="f-stock">
+          <option value="1">В наличии</option>
+          <option value="0">Нет</option>
+        </select>
+      </div>
+    </div>
+    <button class="savebtn green" onclick="saveProduct()"><i class="ti ti-check"></i>Сохранить</button>
+    <button class="savebtn red" id="del-btn" style="display:none" onclick="deleteProduct()"><i class="ti ti-trash"></i>Удалить товар</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS={laptop:'Ноутбуки',phone:'Смартфоны',audio:'Аудио',accessories:'Аксессуары',tablet:'Планшеты',other:'Другое'};
+const LS='techstore_cloud';
+
+const DEFAULT_PRODUCTS=[
+  {id:1,name:'Ноутбук Acer Aspire 5',desc:'Intel i5-1235U, 16GB, 512GB SSD, 15.6" FHD IPS',price:52490,emoji:'💻',cat:'laptop',stock:1},
+  {id:2,name:'iPhone 15',desc:'6.1", A16 Bionic, 128GB, Dynamic Island',price:79990,emoji:'📱',cat:'phone',stock:1},
+  {id:3,name:'Sony WH-1000XM5',desc:'ANC, 30ч работы, LDAC, Bluetooth 5.2',price:18990,emoji:'🎧',cat:'audio',stock:1},
+  {id:4,name:'Logitech MX Master 3S',desc:'8000 DPI, тихий клик, Bluetooth + USB',price:7490,emoji:'🖱️',cat:'accessories',stock:1},
+  {id:5,name:'iPad Air 11"',desc:'M2 chip, 256GB, Wi-Fi, Liquid Retina',price:74990,emoji:'📲',cat:'tablet',stock:0},
+  {id:6,name:'Samsung Galaxy S24',desc:'Snapdragon 8 Gen 3, 12GB, 256GB, 6.2"',price:69990,emoji:'📱',cat:'phone',stock:1},
+];
+
+let cfg={};
+let products=[];
+let editId=null;
+
+function loadCfg(){
+  try{const s=localStorage.getItem(LS);if(s)cfg=JSON.parse(s);}catch(e){}
+}
+function saveCfg(){
+  try{localStorage.setItem(LS,JSON.stringify(cfg));}catch(e){}
+}
+
+function init(){
+  loadCfg();
+  if(cfg.binId&&cfg.apiKey){
+    showMain();
+  } else {
+    document.getElementById('setup-screen').classList.add('on');
+  }
+}
+
+function showMain(){
+  document.getElementById('setup-screen').classList.remove('on');
+  document.getElementById('main-screen').classList.add('on');
+  if(cfg.shopName){document.getElementById('sname-sub').textContent=cfg.shopName;document.getElementById('m-shopname').value=cfg.shopName;}
+  if(cfg.botToken)document.getElementById('m-token').value=cfg.botToken;
+  if(cfg.chatId)document.getElementById('m-chatid').value=cfg.chatId;
+  if(cfg.tg)document.getElementById('m-tg').value=cfg.tg;
+  if(cfg.phone)document.getElementById('m-phone').value=cfg.phone;
+  loadFromCloud();
+}
+
+async function createBin(){
+  const apiKey=document.getElementById('setup-apikey').value.trim();
+  if(!apiKey){toast('Вставьте API-ключ из JSONBin.io','err');return;}
+  const btn=document.getElementById('create-bin-btn');
+  btn.innerHTML='<span class="spinner"></span>Создаём хранилище...';btn.disabled=true;
+  const shopName=document.getElementById('setup-shopname').value.trim()||'TechStore';
+  const payload={
+    products:DEFAULT_PRODUCTS,
+    shopName,
+    botToken:document.getElementById('setup-token').value.trim(),
+    chatId:document.getElementById('setup-chatid').value.trim(),
+    tg:document.getElementById('setup-tg').value.trim(),
+    phone:document.getElementById('setup-phone').value.trim(),
+  };
+  try{
+    const r=await fetch('https://api.jsonbin.io/v3/b',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Master-Key':apiKey,'X-Bin-Name':'TechStore','X-Collection-Name':'techstore'},
+      body:JSON.stringify(payload)
+    });
+    const d=await r.json();
+    if(d.metadata&&d.metadata.id){
+      cfg={binId:d.metadata.id,apiKey,shopName,botToken:payload.botToken,chatId:payload.chatId,tg:payload.tg,phone:payload.phone};
+      saveCfg();
+      toast('🎉 Хранилище создано!');
+      document.getElementById('finish-btn').disabled=false;
+      document.getElementById('finish-btn').style.background='var(--green)';
+      btn.innerHTML='<i class="ti ti-check"></i>Хранилище создано ✓';
+    } else {
+      toast('Ошибка: '+(d.message||'неверный API-ключ'),'err');
+      btn.innerHTML='<i class="ti ti-cloud-plus"></i>Создать хранилище автоматически';btn.disabled=false;
+    }
+  }catch(e){
+    toast('Ошибка соединения с JSONBin.io','err');
+    btn.innerHTML='<i class="ti ti-cloud-plus"></i>Создать хранилище автоматически';btn.disabled=false;
+  }
+}
+
+function finishSetup(){
+  if(!cfg.binId){toast('Сначала создайте хранилище (шаг 3)','err');return;}
+  showMain();
+  toast('✅ Настройка завершена! Товары в облаке');
+}
+
+function resetSetup(){
+  if(!confirm('Сбросить настройки облака? Товары в JSONBin останутся.'))return;
+  localStorage.removeItem(LS);cfg={};
+  document.getElementById('main-screen').classList.remove('on');
+  document.getElementById('setup-screen').classList.add('on');
+}
+
+async function loadFromCloud(){
+  try{
+    const r=await fetch(`https://api.jsonbin.io/v3/b/${cfg.binId}/latest`,{headers:{'X-Master-Key':cfg.apiKey,'X-Bin-Meta':'false'}});
+    const d=await r.json();
+    if(d&&d.products){products=d.products;}
+    else if(Array.isArray(d)){products=d;}
+  }catch(e){toast('Ошибка загрузки товаров','err');}
+  renderAdminList();
+}
+
+async function syncToCloud(){
+  const payload={
+    products,
+    shopName:cfg.shopName||'TechStore',
+    botToken:cfg.botToken||'',
+    chatId:cfg.chatId||'',
+    tg:cfg.tg||'',
+    phone:cfg.phone||'',
+  };
+  try{
+    const r=await fetch(`https://api.jsonbin.io/v3/b/${cfg.binId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':cfg.apiKey},
+      body:JSON.stringify(payload)
+    });
+    const d=await r.json();
+    return!!d.record;
+  }catch(e){return false;}
+}
+
+function renderStats(){
+  const total=products.length;
+  const inStock=products.filter(p=>p.stock).length;
+  const cats=new Set(products.map(p=>p.cat)).size;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-val">${total}</div><div class="stat-label">Товаров</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--green)">${inStock}</div><div class="stat-label">В наличии</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--blue)">${cats}</div><div class="stat-label">Категорий</div></div>`;
+}
+function renderAdminList(){
+  renderStats();
+  const el=document.getElementById('admin-list');
+  if(!products.length){el.innerHTML='<div class="empty"><i class="ti ti-package-off"></i><p>Товаров пока нет. Нажмите «Добавить товар»</p></div>';return;}
+  el.innerHTML=products.map(p=>`
+    <div class="admcard">
+      <div class="admemoji">${p.emoji}</div>
+      <div class="adm-info">
+        <div class="adm-name">${p.name}</div>
+        <div class="adm-desc">${p.desc}</div>
+        <div class="adm-meta">
+          <span class="adm-price">${p.price.toLocaleString('ru')} ₽</span>
+          <span class="adm-cat">${CATS[p.cat]||p.cat}</span>
+          <span class="pstock ${p.stock?'in':'out'}">${p.stock?'В наличии':'Нет'}</span>
+        </div>
+      </div>
+      <div class="adm-acts">
+        <button class="act-btn" onclick="openModal(${p.id})" title="Редактировать"><i class="ti ti-edit"></i></button>
+        <button class="act-btn del" onclick="quickDelete(${p.id})" title="Удалить"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+function openModal(id=null){
+  editId=id;
+  document.getElementById('del-btn').style.display=id?'flex':'none';
+  document.getElementById('modal-title-text').textContent=id?'Редактировать товар':'Добавить товар';
+  if(id){const p=products.find(x=>x.id===id);if(p){document.getElementById('f-name').value=p.name;document.getElementById('f-desc').value=p.desc;document.getElementById('f-price').value=p.price;document.getElementById('f-emoji').value=p.emoji;document.getElementById('f-cat').value=p.cat;document.getElementById('f-stock').value=p.stock;}}
+  else{['f-name','f-desc','f-price','f-emoji'].forEach(i=>document.getElementById(i).value='');document.getElementById('f-cat').value='laptop';document.getElementById('f-stock').value='1';}
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
+document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+async function saveProduct(){
+  const name=document.getElementById('f-name').value.trim();
+  const desc=document.getElementById('f-desc').value.trim();
+  const price=parseInt(document.getElementById('f-price').value)||0;
+  const emoji=document.getElementById('f-emoji').value.trim()||'📦';
+  const cat=document.getElementById('f-cat').value;
+  const stock=parseInt(document.getElementById('f-stock').value);
+  if(!name){toast('Введите название товара','err');return;}
+  if(!price){toast('Введите цену товара','err');return;}
+  if(editId){const p=products.find(x=>x.id===editId);if(p)Object.assign(p,{name,desc,price,emoji,cat,stock});}
+  else products.push({id:Date.now(),name,desc,price,emoji,cat,stock});
+  closeModal();renderAdminList();
+  toast('Синхронизируем с облаком...','warn');
+  const ok=await syncToCloud();
+  toast(ok?(editId?'Товар обновлён ✓':'Товар добавлен ✓'):'Ошибка синхронизации',ok?'':'err');
+  editId=null;
+}
+async function deleteProduct(){
+  if(!editId)return;
+  if(!confirm('Удалить этот товар?'))return;
+  products=products.filter(x=>x.id!==editId);
+  closeModal();renderAdminList();
+  toast('Удаляем из облака...','warn');
+  const ok=await syncToCloud();
+  toast(ok?'Товар удалён ✓':'Ошибка синхронизации',ok?'':'err');
+  editId=null;
+}
+async function quickDelete(id){
+  if(!confirm('Удалить этот товар?'))return;
+  products=products.filter(x=>x.id!==id);
+  renderAdminList();
+  toast('Удаляем из облака...','warn');
+  const ok=await syncToCloud();
+  toast(ok?'Товар удалён ✓':'Ошибка синхронизации',ok?'':'err');
+}
+async function saveAndSync(){
+  const btn=document.getElementById('save-settings-btn');
+  btn.innerHTML='<span class="spinner"></span>Синхронизируем...';btn.disabled=true;
+  cfg.botToken=document.getElementById('m-token').value.trim();
+  cfg.chatId=document.getElementById('m-chatid').value.trim();
+  cfg.shopName=document.getElementById('m-shopname').value.trim()||'TechStore';
+  cfg.tg=document.getElementById('m-tg').value.trim();
+  cfg.phone=document.getElementById('m-phone').value.trim();
+  saveCfg();
+  document.getElementById('sname-sub').textContent=cfg.shopName;
+  const ok=await syncToCloud();
+  btn.innerHTML='<i class="ti ti-device-floppy"></i>Сохранить и синхронизировать';btn.disabled=false;
+  toast(ok?'✅ Настройки сохранены и синхронизированы':'Ошибка синхронизации',ok?'':'err');
+}
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'')+' show';setTimeout(()=>t.className='toast'+(type?' '+type:''),2600);}
+init();
+</script>
+</body>
+</html>
